@@ -1,0 +1,25 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "io.cordova.helloworld"
+    },
+    "cordova-plugin-admob-free": {
+      "PACKAGE_NAME": "io.cordova.helloworld"
+    }
+  },
+  "dependent_plugins": {
+    "cordova-promise-polyfill": {
+      "PACKAGE_NAME": "io.cordova.helloworld"
+    },
+    "cordova-admob-sdk": {
+      "PACKAGE_NAME": "io.cordova.helloworld"
+    }
+  }
+}

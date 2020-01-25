@@ -1,0 +1,11 @@
+{
+  "background_color": "#FFF",
+  "display": "standalone",
+  "name": "f5-sudoku",
+  "short_name": "f5-sudoku",
+  "version": "io.cordova.helloworld",
+  "description": "Vue.js + Onsen UI + Cordova sample app",
+  "author": "Vue.js + Onsen UI + Cordova teams",
+  "icons": [],
+  "start_url": "dist/index.html"
+}
