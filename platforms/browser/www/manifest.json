@@ -3,7 +3,7 @@
   "display": "standalone",
   "name": "f5-sudoku",
   "short_name": "f5-sudoku",
-  "version": "io.cordova.helloworld",
+  "version": "io.cordova.f5sudoku",
   "description": "Vue.js + Onsen UI + Cordova sample app",
   "author": "Vue.js + Onsen UI + Cordova teams",
   "icons": [],

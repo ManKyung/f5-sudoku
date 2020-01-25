@@ -2,16 +2,12 @@
   <v-ons-page>
     <v-ons-toolbar>
       <div class="left">
-        <router-link to="/game">
-          <v-ons-toolbar-button>
-            <v-ons-icon icon="md-arrow-left"></v-ons-icon>
-          </v-ons-toolbar-button>
-        </router-link>
+        <v-ons-back-button></v-ons-back-button>
       </div>
       <div class="center primary--text">{{stage.toUpperCase()}} LEVEL {{id}}</div>
       <div class="right">
-        <v-ons-toolbar-button @click="doFavorite()">
-          <v-ons-icon :icon="isFavorite ? 'md-star' : 'md-star-outline'"></v-ons-icon>
+        <v-ons-toolbar-button @click="doReset()">
+          <v-ons-icon icon="md-refresh"></v-ons-icon>
         </v-ons-toolbar-button>
       </div>
     </v-ons-toolbar>
@@ -25,9 +21,9 @@
           :class="[
             x % 3 === 2 && x !== 8 ? 'border-right' : '', 
             y % 3 === 2 && y !== 8 ? 'border-bottom' : '',
-            exactActiveTile[getTileIndex(x, y)] === true ? 'ractive' : '',
-            activeTile[getTileIndex(x, y)] === true ? 'active' : '',
-            isFailTile[getTileIndex(x, y)] === true ? 'fail-active' : ''
+            exactActiveTile === getTileIndex(x, y) ? 'ractive' : '',
+            activeTile.indexOf(getTileIndex(x, y)) !== -1 ? 'active' : '',
+            isFailTile.indexOf(getTileIndex(x, y)) !== -1 ? 'fail-active' : ''
             ]"
           :style="`height:${tileHeight}px`"
           @click="isActive(x, y)"
@@ -60,26 +56,41 @@
     <div class="game-pad">
       <div class="game-numpad w-100">
         <v-ons-row class="text-center pt-2 pl-2 pr-2">
-          <v-ons-col v-for="i in [1,2,3,4,5,6,7,8,9]" :key="i">
-            <v-ons-button @click="setNumber(i)">{{i}}</v-ons-button>
+          <v-ons-col v-for="i in [1,2,3,4,5,6,7,8,9]" :key="i" @click="setNumber(i)" width="11%">
+            <v-ons-button modifier="material" class="px-3">{{i}}</v-ons-button>
           </v-ons-col>
         </v-ons-row>
 
         <v-ons-row class="text-center pt-4 pl-2 pr-2">
           <v-ons-col>
-            <v-ons-toolbar-button class="pa-0" v-if="this.x && this.y && isEditTile(x, y)">
+            <v-ons-toolbar-button
+              class="pa-0"
+              modifier="material"
+              v-if="x !== undefined && y !== undefined && isEditTile(x, y)"
+            >
               <v-ons-icon @click="remove()" class="blue-grey--text game-pad-icon" icon="md-delete">
                 <div style="font-size:0.5em;">DELETE</div>
               </v-ons-icon>
             </v-ons-toolbar-button>
-            <v-ons-toolbar-button v-else class="pa-0">
+            <v-ons-toolbar-button v-else class="pa-0" modifier="material">
               <v-ons-icon class="grey--text game-pad-icon" icon="md-delete">
                 <div style="font-size:0.5em;">DELETE</div>
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
           <v-ons-col>
-            <v-ons-toolbar-button class="pa-0" @click="note()">
+            <v-ons-toolbar-button class="pa-0" modifier="material" @click="undo()">
+              <v-ons-icon
+                :class="[ this.historyTile.length ? 'blue-grey--text': 'grey--text' ]"
+                class="game-pad-icon"
+                icon="md-undo"
+              >
+                <div style="font-size:0.5em;">UNDO</div>
+              </v-ons-icon>
+            </v-ons-toolbar-button>
+          </v-ons-col>
+          <v-ons-col>
+            <v-ons-toolbar-button class="pa-0" modifier="material" @click="note()">
               <v-ons-icon
                 :class="[ noteMode ? 'blue--text': 'blue-grey--text' ]"
                 class="game-pad-icon"
@@ -90,7 +101,7 @@
             </v-ons-toolbar-button>
           </v-ons-col>
           <v-ons-col>
-            <v-ons-toolbar-button class="pa-0" @click="hint()">
+            <v-ons-toolbar-button class="pa-0" modifier="material" v-touch:tap="hintHandler">
               <v-ons-icon class="blue-grey--text game-pad-icon" icon="md-coffee">
                 <div style="font-size:0.5em;">HINT</div>
               </v-ons-icon>
@@ -103,15 +114,17 @@
 </template>
 
 <script>
+import { showInterstitial } from "@/api/admob.js";
 export default {
   name: "play",
   data() {
     return {
       board: [],
       activeTile: [], // 마우스 클릭 시 가능 여부 hover
-      isFailTile: [],
-      exactActiveTile: [], // 마우스 클릭 시 가능 여부 hover exact
-      editTile: [], // 현재 타일이 수정가능한지 여부
+      isFailTile: [], // 실패했을 시
+      exactActiveTile: -1, // 마우스 클릭 시 가능 여부 hover exact
+      editTile: [], // 현재 타일이 수정가능한지 여부,
+      historyTile: [], // Undo 기능을 위한 배열
       noteTile: [
         [1, 2, 3],
         [4, 5, 6],
@@ -128,8 +141,8 @@ export default {
       id: 0,
       stage: "",
       noteTileHeight: "",
-      gamePadHeight: 100,
-      isFavorite: false
+      gamePadHeight: 100
+      // isFavorite: false
     };
   },
   created() {
@@ -138,25 +151,34 @@ export default {
     this.stage = String(this.params.stage);
   },
   mounted() {
-    this.gameSetting();
-    // // this.resizeHandler = window.addEventListener("resize", this.resize);
-
-    this.$nextTick(() => {
+    // // // this.resizeHandler = window.addEventListener("resize", this.resize);
+    setTimeout(() => {
+      // this.gameSetting();
       this.gameUI();
       this.gameInit();
-    });
+    }, 1);
   },
   destroyed() {
-    this.resizeHandler = null;
+    this.board = [];
+    this.activeTile = []; // 마우스 클릭 시 가능 여부 hover
+    this.isFailTile = []; // 실패했을 시
+    this.editTile = []; // 현재 타일이 수정가능한지 여부
   },
+  // destroyed() {
+  //   this.resizeHandler = null;
+  // },
   methods: {
-    gameSetting() {
-      let key = `${this.stage}-favorite`;
-      let result = localStorage[key];
-      let items = result.split(",");
-      if (items.indexOf(this.id) !== -1) {
-        this.isFavorite = true;
-      }
+    hintHandler() {
+      showInterstitial();
+    },
+    doReset() {
+      this.$ons.notification
+        .confirm("Are you sure?", { title: "Reset" })
+        .then(response => {
+          if (response) {
+            this.gameInit();
+          }
+        });
     },
     gameUI() {
       let pageHeight = this.$refs.gameBoard.parentElement.clientHeight;
@@ -173,18 +195,42 @@ export default {
       let y = this.y;
       if (this.isEditTile(x, y)) {
         this.$set(this.board[y], x, 0);
-        this.$set(this.isFailTile, this.getTileIndex(x, y), false);
+
+        let index = this.isFailTile.indexOf(this.getTileIndex(x, y));
+
+        if(index !== -1){
+          this.isFailTile.splice(index, 1);
+        }
       }
     },
     note() {
       this.noteMode = !this.noteMode;
     },
-    hint() {},
+    undo() {
+      let len = this.historyTile.length;
+      let item = this.historyTile[len - 1];
+
+      if (item === undefined || item.index === undefined) {
+        return false;
+      }
+
+      let index = this.getTileXY(item.index);
+      let x = index.x;
+      let y = index.y;
+      this.$set(this.board[x], y, 0);
+
+      let failIndex = this.isFailTile.indexOf(this.getTileIndex(y, x));
+      if (failIndex !== -1) {
+        this.isFailTile.splice(failIndex, 1);
+      }
+
+      this.isActive(y, x)
+
+      this.historyTile.pop();
+    },
     isClear() {
-      for (let i = 0; i < 81; i++) {
-        if (this.isFailTile[i]) {
-          return false;
-        }
+      if (this.isFailTile.length !== 0) {
+        return false;
       }
 
       for (let x = 0; x < 9; x++) {
@@ -195,6 +241,7 @@ export default {
         }
       }
 
+      // 클리어 기록 저장
       let key = `${this.stage}-clear`;
       let result = localStorage[key];
 
@@ -206,15 +253,21 @@ export default {
       }
       localStorage[key] = clearList;
 
-      let vm = this;
-      this.$ons.notification.alert("Congratulations", {
-        callback() {
-          vm.$router.push("/game/clear");
-        }
-      });
+      // 타일 색상 변화
+      let gameBoard = this.$refs.gameBoard;
+      let t = gameBoard.getElementsByClassName("game-tile");
+      for (let i = 0; i < t.length; i++) {
+        t[i].classList.remove("active");
+        t[i].classList.add("game-clear");
+      }
 
-      // return true;
-      // console.log(this.board.length)
+      // 1초 후 완료페이지 이동
+      setTimeout(() => {
+        this.$router.push({
+          name: "Clear",
+          params: { stage: this.stage, id: Number(this.id) + 1 }
+        });
+      }, 1000);
     },
     isCheck(number) {
       let x = this.x;
@@ -253,6 +306,8 @@ export default {
 
       // 타일의 값과 입력한 값이 같은 경우
       if (this.board[y][x] === number) {
+        this.remove()
+        this.setNumber(number)
         return;
       }
 
@@ -260,16 +315,25 @@ export default {
         // 노트모드가 아닐 경우
         if (this.isEditTile(x, y)) {
           // 색상체크
-          this.$set(
-            this.isFailTile,
-            this.getTileIndex(x, y),
-            !this.isCheck(number)
-          );
+          let index = this.isFailTile.indexOf(this.getTileIndex(x, y));
+          if (!this.isCheck(number)) {
+            if (index === -1) {
+              this.isFailTile.push(this.getTileIndex(x, y));
+            }
+          } else {
+            if(index !== -1){
+              this.isFailTile.splice(index, 1);
+            }
+          }
 
           // 수정 가능한 타일인지 확인
           this.$set(this.board[y], x, number);
+          this.historyTile.push({
+            index: this.getTileIndex(x, y),
+            value: number
+          });
+          this.isClear();
         }
-        this.isClear();
       } else {
         // 노트모드 일경우
         let temp = this.editTile[y][x] || [];
@@ -302,12 +366,18 @@ export default {
 
       let expectedBoard = this.$store.state.levels[this.stage][this.id];
 
+      this.activeTile = []; // 마우스 클릭 시 가능 여부 hover
+      this.isFailTile = []; // 실패했을 시
+      this.editTile = []; // 현재 타일이 수정가능한지 여부
+      this.exactActiveTile = -1;
+
       // 현재 타일 수정 가능여부
       this.editTile = [];
       for (let i = 0; i < 9; i++) {
         let temp = [];
         for (let j = 0; j < 9; j++) {
           if (expectedBoard[i][j] === 0) {
+            // 값이 없을경우에는 노트모드 세팅
             temp.push([
               [0, 0, 0],
               [0, 0, 0],
@@ -320,37 +390,31 @@ export default {
         this.editTile.push(temp);
       }
 
-      // 타일 가능범위
-      for (let i = 0; i < 81; i++) {
-        this.activeTile[i] = false;
-        this.exactActiveTile[i] = false;
-        this.isFailTile[i] = false;
-      }
-
-      this.board = expectedBoard;
+      // 깊은 복사
+      this.board = JSON.parse(JSON.stringify(expectedBoard));
     },
     isEditTile(x, y) {
       return typeof this.editTile[y][x] === "object";
     },
     isActive(i, j) {
       let key = this.getTileIndex(i, j);
+      this.activeTile = [];
       for (let a = 0; a < 81; a++) {
-        this.$set(this.activeTile, a, false);
-        this.$set(this.exactActiveTile, a, false);
-
+        // 세로행
         if (a % 9 === i) {
-          this.$set(this.activeTile, a, true);
+          this.activeTile.push(a);
         }
+        // 가로행
         if (9 * j <= a && a < 9 * (j + 1)) {
-          this.$set(this.activeTile, a, true);
+          this.activeTile.push(a);
         }
       }
-      let activeTileNumber = this.getGroupTile(key);
-      for (let a = 0; a < activeTileNumber.length; a++) {
-        this.$set(this.activeTile, activeTileNumber[a], true);
-      }
+      // 클릭한 범위의 컬럼
+      this.activeTile = this.activeTile.concat(this.getGroupTile(key));
 
-      this.$set(this.exactActiveTile, key, !this.exactActiveTile[key]);
+      // 클릭한 타일은 좀더 진하게
+      this.exactActiveTile = this.getTileIndex(i, j);
+
       this.x = i;
       this.y = j;
     },
@@ -457,6 +521,7 @@ export default {
   background: #b5daff;
 }
 
+.game-clear,
 .game-tile:hover,
 .game-tile:focus,
 .game-tile:active {

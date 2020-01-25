@@ -4,9 +4,9 @@
       <div class="center primary--text">CLEAR</div>
     </v-ons-toolbar>
 
-    <div class="text-center pt-10">LEVEL CLEAR</div>
     <div class="text-center pt-10">
-      <v-ons-toolbar-button>
+    <img src="../assets/images/clear.gif" style="width:80%" class="mb-7"/>
+      <v-ons-toolbar-button class="pa-0" v-touch:tap="nextHandler">
         <v-ons-button class="next-btn">
           <v-ons-icon icon="md-arrow-right"></v-ons-icon>
         </v-ons-button>
@@ -16,33 +16,29 @@
 </template>
 
 <script>
-// import { initAd, showAd } from "@/api/adMob.js";
-import admob from 'cordova-plugin-admob-free'
+import {showInterstitial} from '@/api/admob.js'
 export default {
   name: "clear",
   data() {
-    return {};
+    return {
+      params: this.$router.history.current.params,
+    };
   },
-  created() {},
-  mounted() {
-    // banner.config({
-    // id: 'ca-app-pub-3940256099942544/6300978111',
-    // })
-    document.addEventListener("deviceready", () => {
-      console.log(123)
-      // initAd();
-      // showAd();
-    });
-//     banner.config({
-//  id: 'ca-app-pub-3940256099942544/6300978111',
-// })
-// banner.prepare()
-
-// // Show the banner
-// banner.show()
+  mounted(){
+    document.addEventListener("deviceready", function(){
+      showInterstitial();
+    })
   },
-  destroyed() {},
-  methods: {}
+  methods: {
+    nextHandler(){
+      let stage = this.params.stage;
+      let id = this.params.id;
+      this.$router.push({
+        name: "Play",
+        params: { stage: stage, id: id }
+      });
+    },
+  }
 };
 </script>
 

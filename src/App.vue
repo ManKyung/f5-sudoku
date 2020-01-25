@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import {showBanner} from '@/api/admob.js'
 export default {
   name: 'app',
   data() {
@@ -37,6 +38,11 @@ export default {
     mapRouteStack(this.$route);
     /* On route change, reset the pageStack to the next route */
     this.$router.beforeEach((to, from, next) => mapRouteStack(to) && next());
+  },
+  mounted(){
+    document.addEventListener("deviceready", function(){
+      showBanner();
+    })
   }
 }
 </script>

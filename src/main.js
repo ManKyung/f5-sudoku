@@ -9,9 +9,11 @@ import store from './store'
 import router from './router'
 import App from './App'
 import './assets/css/index.css'
-
+import Vue2TouchEvents from 'vue2-touch-events'
+ 
 Vue.config.productionTip = false
 
+Vue.use(Vue2TouchEvents)
 Vue.use(VueOnsen)
 
 /* eslint-disable no-new */
