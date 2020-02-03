@@ -1,13 +1,13 @@
 <template>
   <v-ons-page>
-    <v-ons-toolbar>
+    <v-ons-toolbar class="primary">
       <div class="left">
         <v-ons-back-button></v-ons-back-button>
       </div>
-      <div class="center primary--text">{{stage.toUpperCase()}} LEVEL {{id}}</div>
+      <div class="center white--text">{{stage.toUpperCase()}} LEVEL {{idx}}</div>
       <div class="right">
-        <v-ons-toolbar-button @click="doReset()">
-          <v-ons-icon icon="md-refresh"></v-ons-icon>
+        <v-ons-toolbar-button @click="doReset">
+          <v-ons-icon icon="md-refresh" class="white--text"></v-ons-icon>
         </v-ons-toolbar-button>
       </div>
     </v-ons-toolbar>
@@ -32,23 +32,16 @@
             <div class="tile-num">{{num}}</div>
           </div>
           <div v-else class="note-tile">
-            <v-ons-row v-for="(i, index) in editTile[y][x]" :key="index">
+            <v-ons-row v-for="(i, index) in editTile[y][x]" :key="index"
+                :style="`height: ${noteTileHeight}px`">
               <v-ons-col
                 v-for="(j, _index) in i"
                 :key="_index"
-                :style="`height: ${noteTileHeight}px`"
               >
                 <span v-if="j !== 0">{{j}}</span>
               </v-ons-col>
             </v-ons-row>
           </div>
-          <!-- <span v-else>
-            <div class="note-tile">
-              <v-ons-row v-for="(i, index) in editTile[y][x]" :key="index">
-                <v-ons-col v-for="j in i" :key="j" :style="`height: ${noteTileHeight}px`">{{j}}</v-ons-col>
-              </v-ons-row>
-            </div>
-          </span>-->
         </v-ons-col>
       </v-ons-row>
     </div>
@@ -56,30 +49,32 @@
     <div class="game-pad">
       <div class="game-numpad w-100">
         <v-ons-row class="text-center pt-2 pl-2 pr-2">
-          <v-ons-col v-for="i in [1,2,3,4,5,6,7,8,9]" :key="i" @click="setNumber(i)" width="11%">
-            <v-ons-button modifier="material" class="px-3">{{i}}</v-ons-button>
+          <v-ons-col v-for="i in gamePad" :key="i" @click="setNumber(i)" width="11%">
+            <v-ons-button modifier="material" class="px-3 btn-num">{{i}}</v-ons-button>
           </v-ons-col>
         </v-ons-row>
 
         <v-ons-row class="text-center pt-4 pl-2 pr-2">
-          <v-ons-col>
-            <v-ons-toolbar-button
-              class="pa-0"
-              modifier="material"
-              v-if="x !== undefined && y !== undefined && isEditTile(x, y)"
-            >
-              <v-ons-icon @click="remove()" class="blue-grey--text game-pad-icon" icon="md-delete">
+          <v-ons-col
+            class="col-click"
+            v-if="x !== undefined && y !== undefined && isEditTile(x, y)"
+            @click="removeHandler"
+          >
+            <v-ons-toolbar-button class="pa-0" modifier="material">
+              <v-ons-icon class="blue-grey--text game-pad-icon" icon="md-delete">
                 <div style="font-size:0.5em;">DELETE</div>
               </v-ons-icon>
             </v-ons-toolbar-button>
-            <v-ons-toolbar-button v-else class="pa-0" modifier="material">
+          </v-ons-col>
+          <v-ons-col class="col-click" v-else>
+            <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon class="grey--text game-pad-icon" icon="md-delete">
                 <div style="font-size:0.5em;">DELETE</div>
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
-          <v-ons-col>
-            <v-ons-toolbar-button class="pa-0" modifier="material" @click="undo()">
+          <v-ons-col class="col-click" @click="undoHandler">
+            <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon
                 :class="[ this.historyTile.length ? 'blue-grey--text': 'grey--text' ]"
                 class="game-pad-icon"
@@ -89,8 +84,8 @@
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
-          <v-ons-col>
-            <v-ons-toolbar-button class="pa-0" modifier="material" @click="note()">
+          <v-ons-col class="col-click" @click="noteHandler">
+            <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon
                 :class="[ noteMode ? 'blue--text': 'blue-grey--text' ]"
                 class="game-pad-icon"
@@ -100,8 +95,8 @@
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
-          <v-ons-col>
-            <v-ons-toolbar-button class="pa-0" modifier="material" v-touch:tap="hintHandler">
+          <v-ons-col class="col-click" @click="hintHandler">
+            <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon class="blue-grey--text game-pad-icon" icon="md-coffee">
                 <div style="font-size:0.5em;">HINT</div>
               </v-ons-icon>
@@ -114,8 +109,11 @@
 </template>
 
 <script>
-import { showInterstitial } from "@/api/admob.js";
+import clearPage from './Clear'
+import { showRewardVideo } from "@/api/admob.js";
+import sudoku from "@/api/sudoku.js";
 export default {
+  props: ['stage', 'id'],
   name: "play",
   data() {
     return {
@@ -125,51 +123,80 @@ export default {
       exactActiveTile: -1, // 마우스 클릭 시 가능 여부 hover exact
       editTile: [], // 현재 타일이 수정가능한지 여부,
       historyTile: [], // Undo 기능을 위한 배열
-      noteTile: [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9]
-      ],
       gamePad: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       tileHeight: 0,
+      noteTileHeight: "",
+      gamePadHeight: 100,
       width: 0,
       resizeHandler: null,
       noteMode: false,
       x: undefined,
       y: undefined,
-      params: this.$router.history.current.params,
-      id: 0,
-      stage: "",
-      noteTileHeight: "",
-      gamePadHeight: 100
-      // isFavorite: false
+      idx: 0,
     };
   },
   created() {
     // 변수 세팅
-    this.id = String(this.params.id);
-    this.stage = String(this.params.stage);
+    this.idx = Number(this.id)
   },
   mounted() {
-    // // // this.resizeHandler = window.addEventListener("resize", this.resize);
     setTimeout(() => {
-      // this.gameSetting();
       this.gameUI();
       this.gameInit();
     }, 1);
+
+    document.addEventListener(
+      "admob.rewardvideo.events.REWARD",
+      this.getCandidate
+    );
   },
   destroyed() {
     this.board = [];
     this.activeTile = []; // 마우스 클릭 시 가능 여부 hover
     this.isFailTile = []; // 실패했을 시
     this.editTile = []; // 현재 타일이 수정가능한지 여부
+    document.removeEventListener(
+      "admob.rewardvideo.events.REWARD",
+      this.getCandidate
+    );
   },
-  // destroyed() {
-  //   this.resizeHandler = null;
-  // },
   methods: {
+    getCandidate() {
+      if(this.isFailTile.length > 0){
+        for(const item of this.isFailTile){
+          let index = this.getTileXY(item)
+          this.$set(this.board[index.x], index.y, 0)
+        }
+        this.isFailTile = [];
+      }
+
+      var candidates = sudoku.get_candidates(
+        sudoku.board_grid_to_string(this.board)
+      );
+      for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+          if (this.isEditTile(x, y)) {
+            let candidateNumbers = candidates[y][x].split("");
+
+            let len = candidateNumbers.length;
+            let temp = [
+              [0, 0, 0],
+              [0, 0, 0],
+              [0, 0, 0]
+            ];
+
+            for (let i = 0; i < len; i++) {
+              let index = this.getNoteTileXY(candidateNumbers[i]);
+              temp[index.x][index.y] = Number(candidateNumbers[i]);
+            }
+            this.$set(this.editTile[y], x, temp);
+          }
+        }
+      }
+    },
     hintHandler() {
-      showInterstitial();
+      // this.getCandidate();
+      showRewardVideo();
     },
     doReset() {
       this.$ons.notification
@@ -190,7 +217,7 @@ export default {
       this.tileHeight = this.width / 9;
       this.noteTileHeight = this.tileHeight / 3;
     },
-    remove() {
+    removeHandler() {
       let x = this.x;
       let y = this.y;
       if (this.isEditTile(x, y)) {
@@ -198,15 +225,15 @@ export default {
 
         let index = this.isFailTile.indexOf(this.getTileIndex(x, y));
 
-        if(index !== -1){
+        if (index !== -1) {
           this.isFailTile.splice(index, 1);
         }
       }
     },
-    note() {
+    noteHandler() {
       this.noteMode = !this.noteMode;
     },
-    undo() {
+    undoHandler() {
       let len = this.historyTile.length;
       let item = this.historyTile[len - 1];
 
@@ -224,7 +251,7 @@ export default {
         this.isFailTile.splice(failIndex, 1);
       }
 
-      this.isActive(y, x)
+      this.isActive(y, x);
 
       this.historyTile.pop();
     },
@@ -247,9 +274,9 @@ export default {
 
       let clearList = result.split(",");
 
-      let index = clearList.indexOf(this.id);
+      let index = clearList.indexOf(this.idx);
       if (index === -1) {
-        clearList.push(this.id);
+        clearList.push(this.idx);
       }
       localStorage[key] = clearList;
 
@@ -263,9 +290,12 @@ export default {
 
       // 1초 후 완료페이지 이동
       setTimeout(() => {
-        this.$router.push({
-          name: "Clear",
-          params: { stage: this.stage, id: Number(this.id) + 1 }
+        this.$emit("push-page", {
+          ...clearPage,
+          onsNavigatorProps: {
+            stage: this.stage,
+            id: Number(this.idx) + 1,
+          }
         });
       }, 1000);
     },
@@ -306,8 +336,8 @@ export default {
 
       // 타일의 값과 입력한 값이 같은 경우
       if (this.board[y][x] === number) {
-        this.remove()
-        this.setNumber(number)
+        this.remove();
+        this.setNumber(number);
         return;
       }
 
@@ -321,7 +351,7 @@ export default {
               this.isFailTile.push(this.getTileIndex(x, y));
             }
           } else {
-            if(index !== -1){
+            if (index !== -1) {
               this.isFailTile.splice(index, 1);
             }
           }
@@ -363,8 +393,7 @@ export default {
       //   [7, 0, 6, 0, 0, 0, 8, 1, 0],
       //   [3, 0, 0, 0, 9, 0, 0, 0, 0]
       // ];
-
-      let expectedBoard = this.$store.state.levels[this.stage][this.id];
+      let expectedBoard = this.$store.state.levels[this.stage][this.idx];
 
       this.activeTile = []; // 마우스 클릭 시 가능 여부 hover
       this.isFailTile = []; // 실패했을 시
@@ -396,27 +425,29 @@ export default {
     isEditTile(x, y) {
       return typeof this.editTile[y][x] === "object";
     },
-    isActive(i, j) {
-      let key = this.getTileIndex(i, j);
+    isActive(x, y) {
+      let key = this.getTileIndex(x, y);
       this.activeTile = [];
-      for (let a = 0; a < 81; a++) {
-        // 세로행
-        if (a % 9 === i) {
-          this.activeTile.push(a);
-        }
-        // 가로행
-        if (9 * j <= a && a < 9 * (j + 1)) {
-          this.activeTile.push(a);
-        }
+
+      // 세로행
+      for (let i = 0; i < 9; i++) {
+        this.activeTile.push(9 * i + x);
       }
+
+      // 가로행
+      let horizontalTiles = this.getHorizontalTile(y);
+      for (let i = 0; i < 9; i++) {
+        this.activeTile.push(horizontalTiles[i]);
+      }
+
       // 클릭한 범위의 컬럼
       this.activeTile = this.activeTile.concat(this.getGroupTile(key));
 
       // 클릭한 타일은 좀더 진하게
-      this.exactActiveTile = this.getTileIndex(i, j);
+      this.exactActiveTile = this.getTileIndex(x, y);
 
-      this.x = i;
-      this.y = j;
+      this.x = x;
+      this.y = y;
     },
     getTileIndex(x, y) {
       return y * 9 + x;
@@ -429,6 +460,20 @@ export default {
     },
     getNoteTileIndex(x, y) {
       return y * 3 + x;
+    },
+    getHorizontalTile(index) {
+      let temp = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        [9, 10, 11, 12, 13, 14, 15, 16, 17],
+        [18, 19, 20, 21, 22, 23, 24, 25, 26],
+        [27, 28, 29, 30, 31, 32, 33, 34, 35],
+        [36, 37, 38, 39, 40, 41, 42, 43, 44],
+        [45, 46, 47, 48, 49, 50, 51, 52, 53],
+        [54, 55, 56, 57, 58, 59, 60, 61, 62],
+        [63, 64, 65, 66, 67, 68, 69, 70, 71],
+        [72, 73, 74, 75, 76, 77, 78, 79, 80]
+      ];
+      return temp[index];
     },
     getNoteTileXY(index) {
       let t = {
@@ -463,144 +508,10 @@ export default {
           }
         }
       }
-    },
-    doFavorite() {
-      let key = `${this.stage}-favorite`;
-      let result = localStorage[key];
-
-      let items = result.split(",");
-
-      // localStorage.favoriteList = result;
-      let index = items.indexOf(this.id);
-      if (index === -1) {
-        items.push(this.id);
-        this.isFavorite = true;
-      } else {
-        items.splice(index, 1);
-        this.isFavorite = false;
-      }
-      localStorage[key] = items;
-      this.$emit("favoriteUpdate");
     }
   }
 };
 </script>
 
 <style>
-.game-board {
-  margin: 0 auto;
-  max-width: 480px;
-  background: white;
-  border: 2px solid #344861;
-}
-.game-pad {
-  width: 100%;
-  display: flex;
-  margin: 0 auto;
-  justify-content: center;
-}
-.game-pad-icon {
-  font-size: 24px;
-  width: 100%;
-}
-.game-tile {
-  border-right: 1px solid #bec6d4;
-  border-bottom: 1px solid #bec6d4;
-}
-.game-tile.active {
-  background: #ddeeff;
-}
-.game-tile.fail-active {
-  background: #eb4e4e !important;
-}
-.game-tile.fail-active div {
-  color: white !important;
-}
-
-.game-tile.ractive {
-  background: #b5daff;
-}
-
-.game-clear,
-.game-tile:hover,
-.game-tile:focus,
-.game-tile:active {
-  background: #b5daff;
-}
-.game-tile.border-right {
-  border-right: 2px solid #344861;
-}
-.game-tile.border-bottom {
-  border-bottom: 2px solid #344861;
-}
-
-.num-pad {
-  float: left;
-  text-align: center;
-}
-
-.btn-num {
-  font-size: 1.3em;
-  text-align: center;
-  border-radius: 0;
-  /* background: transparent;
-  border:1px solid #344861;
-  color:black; */
-}
-.btn-num-col:active {
-  background: #000000 !important;
-}
-.note-tile {
-  font-size: 0.5em;
-}
-
-/* Extra small devices (portrait phones, less than 576px) */
-@media (max-width: 575.98px) {
-  .tile-num {
-    font-size: 7vw;
-    padding-top: 5px;
-  }
-  .num-pad {
-    font-size: 9vw;
-    padding-top: 14px;
-  }
-}
-
-/* Small devices (landscape phones, 576px and up) */
-@media (min-width: 576px) and (max-width: 767.98px) {
-  .tile-num {
-    font-size: 4vw;
-    padding-top: 6px;
-  }
-  .game-pad {
-    margin-top: 20px;
-  }
-}
-
-/* Medium devices (tablets, 768px and up) */
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .tile-num {
-    font-size: 4vw;
-    padding-top: 2px;
-  }
-  .game-pad {
-    margin-top: 20px;
-  }
-}
-
-/* Large devices (desktops, 992px and up) */
-@media (min-width: 992px) and (max-width: 1199.98px) {
-  .tile-num {
-    font-size: 3vw;
-    padding-top: 2px;
-  }
-}
-
-/* Extra large devices (large desktops, 1200px and up) */
-@media (min-width: 1200px) {
-  .tile-num {
-    font-size: 1.5vw;
-    padding-top: 4px;
-  }
-}
 </style>

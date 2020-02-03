@@ -8,16 +8,19 @@
   },
   "installed_plugins": {
     "cordova-plugin-whitelist": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-promise-polyfill": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-admob-sdk": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-plugin-admob-free": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "com.f5game.sudoku"
     }
   },
   "dependent_plugins": {},
@@ -42,12 +45,27 @@
         "AdMob",
         "plugins.AdMob"
       ]
+    },
+    {
+      "file": "plugins/cordova-plugin-splashscreen/www/splashscreen.js",
+      "id": "cordova-plugin-splashscreen.SplashScreen",
+      "pluginId": "cordova-plugin-splashscreen",
+      "clobbers": [
+        "navigator.splashscreen"
+      ]
+    },
+    {
+      "file": "plugins/cordova-plugin-splashscreen/src/browser/SplashScreenProxy.js",
+      "id": "cordova-plugin-splashscreen.SplashScreenProxy",
+      "pluginId": "cordova-plugin-splashscreen",
+      "runs": true
     }
   ],
   "plugin_metadata": {
     "cordova-plugin-whitelist": "1.3.4",
     "cordova-promise-polyfill": "0.0.2",
     "cordova-admob-sdk": "0.24.1",
-    "cordova-plugin-admob-free": "0.27.0"
+    "cordova-plugin-admob-free": "0.27.0",
+    "cordova-plugin-splashscreen": "5.0.3"
   }
 }

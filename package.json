@@ -8,6 +8,8 @@
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "serve": "npm run dev",
     "build": "node build/build.js",
+    "build-app": "node build/build.js && cordova run android --device",
+    "build-release": "node build/build.js && cordova build android --release",
     "build:watch": "cross-env WEBPACK_WATCH=true node build/build.js",
     "lint": "eslint --ext .js,.vue src"
   },
@@ -17,6 +19,7 @@
     "cordova-browser": "^6.0.0",
     "cordova-ios": "^5.1.1",
     "cordova-plugin-admob-free": "^0.27.0",
+    "cordova-plugin-splashscreen": "^5.0.3",
     "cordova-promise-polyfill": "0.0.2",
     "onsenui": "^2.9.1",
     "vue": "^2.5.0",
@@ -91,7 +94,8 @@
       "cordova-plugin-whitelist": {},
       "cordova-plugin-admob-free": {
         "ADMOB_APP_ID": "ca-app-pub-1963334904140891~2745445976"
-      }
+      },
+      "cordova-plugin-splashscreen": {}
     },
     "platforms": [
       "android",

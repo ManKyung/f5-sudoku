@@ -8,21 +8,24 @@
   },
   "installed_plugins": {
     "cordova-plugin-whitelist": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-plugin-admob-free": {
       "ADMOB_APP_ID": "ca-app-pub-1963334904140891~2745445976",
       "PLAY_SERVICES_VERSION": "11.0.4",
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "com.f5game.sudoku"
     }
   },
   "dependent_plugins": {
     "cordova-promise-polyfill": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-admob-sdk": {
       "PLAY_SERVICES_VERSION": "11.0.4",
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     }
   }
 }

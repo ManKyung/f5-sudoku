@@ -1,0 +1,43 @@
+vue init OnsenUI/vue-cordova-webpack [project-name]
+
+
+
+cordova platform add android
+cordova platform add ios
+cordova platform add browser
+
+
+cordova plugin add cordova-plugin-admob-free --save --variable ADMOB_APP_ID="ca-app-pub-1963334904140891~2745445976"
+cordova plugin add cordova-plugin-play-games-services --variable APP_ID=ca-app-pub-1963334904140891~2745445976
+
+
+cordova plugin add cordova-plugin-splashscreen
+
+
+
+
+
+keytool -genkeypair -v -keystore f5sudoku_release.keystore -alias realmojo88 -keyalg RSA -validity 20000
+비밀번호: 정만경!@3
+
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore f5sudoku_release.keystore app-release-unsigned.apk realmojo88
+
+zipalign -v 4 app-release-unsigned.apk f5-sudoku.apk
+
+
+
+
+
+
+
+4700721050470190619
+
+
+
+google play game service sha2
+35:7F:81:9E:EF:7B:8D:82:8B:2E:78:F6:44:ED:E6:0F:2C:06:13:88
+
+
+
+io.f5.sudoku
+66:A5:3B:46:D6:92:02:47:AE:05:B5:34:C7:34:D2:AF:F8:23:5F:8D

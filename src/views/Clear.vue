@@ -5,8 +5,8 @@
     </v-ons-toolbar>
 
     <div class="text-center pt-10">
-    <img src="../assets/images/clear.gif" style="width:80%" class="mb-7"/>
-      <v-ons-toolbar-button class="pa-0" v-touch:tap="nextHandler">
+      <img src="../assets/images/clear.gif" style="width:80%" class="mb-7" />
+      <v-ons-toolbar-button class="pa-0" v-if="isShow" @click="nextHandler">
         <v-ons-button class="next-btn">
           <v-ons-icon icon="md-arrow-right"></v-ons-icon>
         </v-ons-button>
@@ -16,34 +16,40 @@
 </template>
 
 <script>
-import {showInterstitial} from '@/api/admob.js'
+import playPage from "./Play";
+import { showInterstitial } from "@/api/admob.js";
 export default {
+  props: ["stage", "id"],
   name: "clear",
   data() {
     return {
-      params: this.$router.history.current.params,
+      isShow: false
     };
   },
-  mounted(){
-    document.addEventListener("deviceready", function(){
+  mounted() {
+    setTimeout(() => {
+      this.isShow = true;
+    }, 2000);
+    setTimeout(() => {
       showInterstitial();
-    })
+    }, 1000);
   },
   methods: {
-    nextHandler(){
-      let stage = this.params.stage;
-      let id = this.params.id;
-      this.$router.push({
-        name: "Play",
-        params: { stage: stage, id: id }
+    nextHandler() {
+      this.$emit("push-page", {
+        ...playPage,
+        onsNavigatorProps: {
+          stage: this.stage,
+          id: this.id
+        }
       });
-    },
+    }
   }
 };
 </script>
 
 <style>
-.next-btn{
-  width:150px;
+.next-btn {
+  width: 150px;
 }
 </style>

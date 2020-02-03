@@ -3,9 +3,9 @@
   "display": "standalone",
   "name": "f5-sudoku",
   "short_name": "f5-sudoku",
-  "version": "io.cordova.f5sudoku",
-  "description": "Vue.js + Onsen UI + Cordova sample app",
-  "author": "Vue.js + Onsen UI + Cordova teams",
+  "version": "com.f5game.sudoku",
+  "description": "F5-Sudoku Game",
+  "author": "F5-Sudoku Game",
   "icons": [],
-  "start_url": "dist/index.html"
+  "start_url": "index.html"
 }

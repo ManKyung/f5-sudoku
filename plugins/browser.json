@@ -8,18 +8,21 @@
   },
   "installed_plugins": {
     "cordova-plugin-whitelist": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-plugin-admob-free": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "com.f5game.sudoku"
     }
   },
   "dependent_plugins": {
     "cordova-promise-polyfill": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-admob-sdk": {
-      "PACKAGE_NAME": "io.cordova.f5sudoku"
+      "PACKAGE_NAME": "com.f5game.sudoku"
     }
   }
 }

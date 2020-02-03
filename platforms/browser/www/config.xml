@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.cordova.f5sudoku" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.f5game.sudoku" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>f5-sudoku</name>
     <description>
-      Vue.js + Onsen UI + Cordova sample app
+      F5-Sudoku Game
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-      Vue.js + Onsen UI + Cordova teams
+    <author email="realmojo88@gmail.com" href="http://cordova.io">
+      F5-Sudoku Game
     </author>
-    <content src="dist/index.html" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
