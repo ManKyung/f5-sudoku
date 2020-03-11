@@ -1,13 +1,16 @@
 <template>
   <v-ons-page>
-    <v-ons-toolbar class="primary">
+    <v-ons-toolbar class="primary toolbar-title">
       <div class="left">
         <v-ons-back-button></v-ons-back-button>
       </div>
-      <div class="center white--text">{{stage.toUpperCase()}} LEVEL {{idx}}</div>
+      <div class="center fs-20 white--text">{{stage.toUpperCase()}} LEVEL {{idx}}</div>
       <div class="right">
-        <v-ons-toolbar-button @click="doReset">
-          <v-ons-icon icon="md-refresh" class="white--text"></v-ons-icon>
+        <v-ons-toolbar-button v-hammer:tap="doVibration">
+          <v-ons-icon :icon="$store.state.levels.isVibration ? 'ion-ios-volume-high' : 'ion-ios-volume-off'" class="fs-24 white--text"></v-ons-icon>
+        </v-ons-toolbar-button>
+        <v-ons-toolbar-button v-hammer:tap="doReset">
+          <v-ons-icon icon="md-refresh" class="fs-24 white--text"></v-ons-icon>
         </v-ons-toolbar-button>
       </div>
     </v-ons-toolbar>
@@ -26,7 +29,9 @@
             isFailTile.indexOf(getTileIndex(x, y)) !== -1 ? 'fail-active' : ''
             ]"
           :style="`height:${tileHeight}px`"
-          @click="isActive(x, y)"
+          v-hammer:tap="(e)=> isActive(e, x, y)"
+          v-hammer:press="(e)=> isActive(e, x, y)"
+          v-hammer:pan.start="(e)=> isActive(e, x, y)"
         >
           <div v-if="num !== 0" :class="isEditTile(x, y) ? 'primary--text' : ''">
             <div class="tile-num">{{num}}</div>
@@ -49,7 +54,9 @@
     <div class="game-pad">
       <div class="game-numpad w-100">
         <v-ons-row class="text-center pt-2 pl-2 pr-2">
-          <v-ons-col v-for="i in gamePad" :key="i" @click="setNumber(i)" width="11%">
+          <v-ons-col v-for="i in gamePad" :key="i"
+          v-hammer:tap="(e)=> setNumber(e, i)"
+          v-hammer:pan.start="(e)=> setNumber(e, i)" width="11%">
             <v-ons-button modifier="material" class="px-3 btn-num">{{i}}</v-ons-button>
           </v-ons-col>
         </v-ons-row>
@@ -58,7 +65,8 @@
           <v-ons-col
             class="col-click"
             v-if="x !== undefined && y !== undefined && isEditTile(x, y)"
-            @click="removeHandler"
+            v-hammer:tap="removeHandler"
+            v-hammer:pan.start="removeHandler"
           >
             <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon class="blue-grey--text game-pad-icon" icon="md-delete">
@@ -73,7 +81,9 @@
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
-          <v-ons-col class="col-click" @click="undoHandler">
+          <v-ons-col class="col-click" 
+            v-hammer:tap="undoHandler"
+            v-hammer:pan.start="undoHandler">
             <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon
                 :class="[ this.historyTile.length ? 'blue-grey--text': 'grey--text' ]"
@@ -84,7 +94,9 @@
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
-          <v-ons-col class="col-click" @click="noteHandler">
+          <v-ons-col class="col-click" 
+            v-hammer:tap="noteHandler"
+            v-hammer:pan.start="noteHandler">
             <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon
                 :class="[ noteMode ? 'blue--text': 'blue-grey--text' ]"
@@ -95,7 +107,9 @@
               </v-ons-icon>
             </v-ons-toolbar-button>
           </v-ons-col>
-          <v-ons-col class="col-click" @click="hintHandler">
+          <v-ons-col class="col-click"
+            v-hammer:tap="hintHandler"
+            v-hammer:pan.start="hintHandler">
             <v-ons-toolbar-button class="pa-0" modifier="material">
               <v-ons-icon class="blue-grey--text game-pad-icon" icon="md-coffee">
                 <div style="font-size:0.5em;">HINT</div>
@@ -105,12 +119,28 @@
         </v-ons-row>
       </div>
     </div>
+    
+    <v-ons-modal :visible="clearVisible">
+      <div class="clear-modal-wrap w-100 on">
+        <v-ons-card>
+          <div class="black--text fs-24 text-center">STAGE CLEAR</div>
+          <div class="grey--text text-center fs-14 pt-4">Congratulations</div>
+          <div class="pt-8 px-4">
+            <v-ons-button
+              class="w-100 text-center fo"
+              v-hammer:tap="next"
+              v-hammer:pan.start="next"
+            >NEXT</v-ons-button>
+          </div>
+        </v-ons-card>
+      </div>
+    </v-ons-modal>
   </v-ons-page>
 </template>
 
 <script>
-import clearPage from './Clear'
-import { showRewardVideo } from "@/api/admob.js";
+
+import { showRewardVideo, showBanner } from "@/api/admob.js";
 import sudoku from "@/api/sudoku.js";
 export default {
   props: ['stage', 'id'],
@@ -133,6 +163,7 @@ export default {
       x: undefined,
       y: undefined,
       idx: 0,
+      clearVisible: false,
     };
   },
   created() {
@@ -140,11 +171,6 @@ export default {
     this.idx = Number(this.id)
   },
   mounted() {
-    setTimeout(() => {
-      this.gameUI();
-      this.gameInit();
-    }, 1);
-
     document.addEventListener(
       "admob.rewardvideo.events.REWARD",
       this.getCandidate
@@ -159,6 +185,16 @@ export default {
       "admob.rewardvideo.events.REWARD",
       this.getCandidate
     );
+  },
+  watch: {
+    idx(val){
+      if(this.clearVisible){
+        this.clearVisible = false;
+      }
+      this.gameUI();
+      this.gameInit();
+      showBanner()
+    }
   },
   methods: {
     getCandidate() {
@@ -194,11 +230,14 @@ export default {
         }
       }
     },
-    hintHandler() {
+    hintHandler(e) {
       // this.getCandidate();
       showRewardVideo();
     },
-    doReset() {
+    doVibration(e){
+      this.$store.commit('levels/setVibrate', !this.$store.state.levels.isVibration)
+    },
+    doReset(e) {
       this.$ons.notification
         .confirm("Are you sure?", { title: "Reset" })
         .then(response => {
@@ -217,7 +256,7 @@ export default {
       this.tileHeight = this.width / 9;
       this.noteTileHeight = this.tileHeight / 3;
     },
-    removeHandler() {
+    removeHandler(e) {
       let x = this.x;
       let y = this.y;
       if (this.isEditTile(x, y)) {
@@ -230,10 +269,10 @@ export default {
         }
       }
     },
-    noteHandler() {
+    noteHandler(e) {
       this.noteMode = !this.noteMode;
     },
-    undoHandler() {
+    undoHandler(e) {
       let len = this.historyTile.length;
       let item = this.historyTile[len - 1];
 
@@ -251,7 +290,7 @@ export default {
         this.isFailTile.splice(failIndex, 1);
       }
 
-      this.isActive(y, x);
+      this.isActive(e, y, x);
 
       this.historyTile.pop();
     },
@@ -290,14 +329,11 @@ export default {
 
       // 1초 후 완료페이지 이동
       setTimeout(() => {
-        this.$emit("push-page", {
-          ...clearPage,
-          onsNavigatorProps: {
-            stage: this.stage,
-            id: Number(this.idx) + 1,
-          }
-        });
-      }, 1000);
+        this.clearVisible = true;
+      }, 1000)
+    },
+    next(){
+      this.idx++;
     },
     isCheck(number) {
       let x = this.x;
@@ -325,7 +361,7 @@ export default {
       }
       return true;
     },
-    setNumber(number) {
+    setNumber(e, number) {
       // 칸을 선택하지 않았을 경우
       if (this.x === undefined || this.y === undefined) {
         return;
@@ -336,8 +372,10 @@ export default {
 
       // 타일의 값과 입력한 값이 같은 경우
       if (this.board[y][x] === number) {
-        this.remove();
-        this.setNumber(number);
+        // this.setNumber(e, number);
+        if(this.$store.state.levels.isVibration){
+          navigator.vibrate(300);
+        }
         return;
       }
 
@@ -349,6 +387,9 @@ export default {
           if (!this.isCheck(number)) {
             if (index === -1) {
               this.isFailTile.push(this.getTileIndex(x, y));
+            }
+            if(this.$store.state.levels.isVibration){
+              navigator.vibrate(300);
             }
           } else {
             if (index !== -1) {
@@ -399,6 +440,7 @@ export default {
       this.isFailTile = []; // 실패했을 시
       this.editTile = []; // 현재 타일이 수정가능한지 여부
       this.exactActiveTile = -1;
+      this.board = [];
 
       // 현재 타일 수정 가능여부
       this.editTile = [];
@@ -421,11 +463,19 @@ export default {
 
       // 깊은 복사
       this.board = JSON.parse(JSON.stringify(expectedBoard));
+      
+      // 타일 색상 변화
+      let gameBoard = this.$refs.gameBoard;
+      let t = gameBoard.getElementsByClassName("game-tile");
+      for (let i = 0; i < t.length; i++) {
+        t[i].classList.remove("active");
+        t[i].classList.remove("game-clear");
+      }
     },
     isEditTile(x, y) {
       return typeof this.editTile[y][x] === "object";
     },
-    isActive(x, y) {
+    isActive(e, x, y) {
       let key = this.getTileIndex(x, y);
       this.activeTile = [];
 
@@ -512,6 +562,3 @@ export default {
   }
 };
 </script>
-
-<style>
-</style>

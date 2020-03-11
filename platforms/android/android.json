@@ -44,6 +44,12 @@
               "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
               "count": 1
             }
+          ],
+          "/manifest": [
+            {
+              "xml": "<uses-permission android:name=\"android.permission.VIBRATE\" />",
+              "count": 1
+            }
           ]
         }
       }
@@ -66,6 +72,9 @@
       "PACKAGE_NAME": "com.f5game.sudoku"
     },
     "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "com.f5game.sudoku"
+    },
+    "cordova-plugin-vibration": {
       "PACKAGE_NAME": "com.f5game.sudoku"
     }
   },
@@ -106,6 +115,7 @@
     "cordova-promise-polyfill": "0.0.2",
     "cordova-admob-sdk": "0.24.1",
     "cordova-plugin-admob-free": "0.27.0",
-    "cordova-plugin-splashscreen": "5.0.3"
+    "cordova-plugin-splashscreen": "5.0.3",
+    "cordova-plugin-vibration": "3.1.1"
   }
 }

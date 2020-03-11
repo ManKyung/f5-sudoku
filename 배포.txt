@@ -7,7 +7,11 @@ cordova platform add ios
 cordova platform add browser
 
 
+//f5-sudoku
 cordova plugin add cordova-plugin-admob-free --save --variable ADMOB_APP_ID="ca-app-pub-1963334904140891~2745445976"
+
+//f5-jigsaw
+cordova plugin add cordova-plugin-admob-free --save --variable ADMOB_APP_ID="ca-app-pub-1963334904140891~7960249211"
 cordova plugin add cordova-plugin-play-games-services --variable APP_ID=ca-app-pub-1963334904140891~2745445976
 
 
@@ -17,12 +21,15 @@ cordova plugin add cordova-plugin-splashscreen
 
 
 
-keytool -genkeypair -v -keystore f5sudoku_release.keystore -alias realmojo88 -keyalg RSA -validity 20000
+첫 키 생성은 여기서 하고
+keytool -genkeypair -v -keystore f5_sudoku_release.keystore -alias realmojo88 -keyalg RSA -validity 20000
 비밀번호: 정만경!@3
 
-jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore f5sudoku_release.keystore app-release-unsigned.apk realmojo88
 
-zipalign -v 4 app-release-unsigned.apk f5-sudoku.apk
+그 이후 배포는 여기서 부터 하기
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore f5_sudoku_release.keystore app-release-unsigned.apk realmojo88
+
+D:\Android\Sdk\build-tools\28.0.3\zipalign -v 4 app-release-unsigned.apk f5-sudoku.apk
 
 
 

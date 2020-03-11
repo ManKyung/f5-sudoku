@@ -37,6 +37,7 @@
 		10F8076A470B41EE96A86939 /* CDVAdMob.m in Sources */ = {isa = PBXBuildFile; fileRef = 78DC3586652A4BFFB771A2DF /* CDVAdMob.m */; };
 		F2D75E4D592041458153557D /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = CE8E7314D2C64DA997CDA6C7 /* CDVSplashScreen.m */; };
 		D35B676F81DD4461B7FC2814 /* CDVViewController+SplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 49502BAC63BA48669A89D4A4 /* CDVViewController+SplashScreen.m */; };
+		9CF17A5B7FA64862811168DE /* CDVVibration.m in Sources */ = {isa = PBXBuildFile; fileRef = 5276403AA15341FBBD2B8FBA /* CDVVibration.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +111,8 @@
 		49502BAC63BA48669A89D4A4 /* CDVViewController+SplashScreen.m */ = {isa = PBXFileReference; name = "CDVViewController+SplashScreen.m"; path = "cordova-plugin-splashscreen/CDVViewController+SplashScreen.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
 		5390CE5DAC7C49F195437978 /* CDVSplashScreen.h */ = {isa = PBXFileReference; name = "CDVSplashScreen.h"; path = "cordova-plugin-splashscreen/CDVSplashScreen.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 		5E6ADC47EEC64BE288FA09EA /* CDVViewController+SplashScreen.h */ = {isa = PBXFileReference; name = "CDVViewController+SplashScreen.h"; path = "cordova-plugin-splashscreen/CDVViewController+SplashScreen.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		5276403AA15341FBBD2B8FBA /* CDVVibration.m */ = {isa = PBXFileReference; name = "CDVVibration.m"; path = "cordova-plugin-vibration/CDVVibration.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
+		ED76926FF7A34D38B943FFC7 /* CDVVibration.h */ = {isa = PBXFileReference; name = "CDVVibration.h"; path = "cordova-plugin-vibration/CDVVibration.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +263,8 @@
 				49502BAC63BA48669A89D4A4 /* CDVViewController+SplashScreen.m */,
 				5390CE5DAC7C49F195437978 /* CDVSplashScreen.h */,
 				5E6ADC47EEC64BE288FA09EA /* CDVViewController+SplashScreen.h */,
+				5276403AA15341FBBD2B8FBA /* CDVVibration.m */,
+				ED76926FF7A34D38B943FFC7 /* CDVVibration.h */,
 			);
 			name = Plugins;
 			path = "f5-sudoku/Plugins";
@@ -387,6 +392,7 @@
 				10F8076A470B41EE96A86939 /* CDVAdMob.m in Sources */,
 				F2D75E4D592041458153557D /* CDVSplashScreen.m in Sources */,
 				D35B676F81DD4461B7FC2814 /* CDVViewController+SplashScreen.m in Sources */,
+				9CF17A5B7FA64862811168DE /* CDVVibration.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,7 +413,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
@@ -436,7 +441,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;

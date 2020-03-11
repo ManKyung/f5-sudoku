@@ -6,20 +6,21 @@ import 'onsenui/css/onsen-css-components.css'
 import Vue from 'vue'
 import VueOnsen from 'vue-onsenui'
 import store from './store'
-import router from './router'
+// import router from './router'
 import App from './App'
+import { VueHammer } from 'vue2-hammer'
 import './assets/css/index.css'
-import Vue2TouchEvents from 'vue2-touch-events'
- 
+
 Vue.config.productionTip = false
 
-Vue.use(Vue2TouchEvents)
 Vue.use(VueOnsen)
+Vue.use(VueHammer) 
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   store,
-  router,
-  render: h => h(App)
-}).$mount('#app')
+  // router,
+  template: '<App/>',
+  components: { App }
+})

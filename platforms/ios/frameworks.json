@@ -1,6 +1,6 @@
 {
     "AdSupport.framework": 1,
-    "AudioToolbox.framework": 1,
+    "AudioToolbox.framework": 2,
     "AVFoundation.framework": 1,
     "CoreBluetooth.framework": 1,
     "CoreMedia.framework": 1,

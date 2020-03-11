@@ -17,6 +17,9 @@
     },
     "cordova-plugin-splashscreen": {
       "PACKAGE_NAME": "com.f5game.sudoku"
+    },
+    "cordova-plugin-vibration": {
+      "PACKAGE_NAME": "com.f5game.sudoku"
     }
   },
   "dependent_plugins": {

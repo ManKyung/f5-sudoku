@@ -1,11 +1,12 @@
 {
   "background_color": "#FFF",
   "display": "standalone",
-  "name": "f5-sudoku",
-  "short_name": "f5-sudoku",
+  "name": "F5 Sudoku",
+  "short_name": "F5 Sudoku",
   "version": "com.f5game.sudoku",
   "description": "F5-Sudoku Game",
-  "author": "F5-Sudoku Game",
+  "author": "realmojo88",
   "icons": [],
+  "orientation": "portrait",
   "start_url": "index.html"
 }
